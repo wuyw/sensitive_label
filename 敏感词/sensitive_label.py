@@ -28,10 +28,10 @@ def get_sensitive_label(word):
         '谩骂：中国猪，台湾猪，傻逼，傻b，操你妈等\n'
         '根据列举出来各个类别的敏感词，判断输入关键词的类别，仅限于给出的五个关键词的类别，如果实在不能挂靠，可以给出：其他。'
         '输入：{}')
-    prompt.format(word)
+    # prompt.format(word)
     messages = [
         {"role": "system", "content": "你是一个网络警察&敏感词判别专家，专门抓取网路上出现的违规违禁词语。"},
-        {"role": "user", "content": prompt}
+        {"role": "user", "content": prompt.format(word)}
     ]
     try:
         text = tokenizer.apply_chat_template(
