@@ -1,6 +1,9 @@
 # 用于对敏感词类别判断
 import pandas as pd
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from tqdm import tqdm
+tqdm.pandas()
+
 
 device = "cuda"  # the device to load the model onto
 # device = "cpu" # the device to load the model onto
@@ -15,6 +18,8 @@ tokenizer = AutoTokenizer.from_pretrained("/data/hub/qwen/Qwen2-72B-Instruct-GPT
 
 
 def get_sensitive_label(word):
+    if word is None:
+        return "其他"
     prompt = (
         '你是一个敏感词判别专家，敏感词的类别有：色情，政治，暴恐，谩骂，赌博五个类别，现在有一批关键词需要判断敏感词的类别。\n'
         '色情：骚妇，骚货，淫荡自慰器，插阴，潮吹，潮喷等\n'
@@ -60,6 +65,6 @@ def get_sensitive_label(word):
 word_list = pd.read_table('暂未分类.txt', sep='\t', header=None, names=['word'])
 
 
-word_list['label'] = word_list['word'].apply(get_sensitive_label)
+word_list['label'] = word_list['word'].progress_apply(get_sensitive_label)
 
 word_list.to_csv('result.csv',index=None)
