@@ -2,8 +2,8 @@
 import pandas as pd
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from tqdm import tqdm
-tqdm.pandas()
 
+tqdm.pandas()
 
 device = "cuda"  # the device to load the model onto
 # device = "cpu" # the device to load the model onto
@@ -17,9 +17,12 @@ model = AutoModelForCausalLM.from_pretrained(
 tokenizer = AutoTokenizer.from_pretrained("/data/hub/qwen/Qwen2-72B-Instruct-GPTQ-Int4")
 
 
-def get_sensitive_label(word):
+def get_sensitive_label(row):
+
+    word = row['word']
     if word is None:
-        return "其他"
+        row['label'] = "其他"
+        return row
     prompt = (
         '你是一个敏感词判别专家，敏感词的类别有：色情，政治，暴恐，谩骂，赌博五个类别，现在有一批关键词需要判断敏感词的类别。\n'
         '色情：骚妇，骚货，淫荡自慰器，插阴，潮吹，潮喷等\n'
@@ -54,17 +57,43 @@ def get_sensitive_label(word):
         # 色情，政治，暴恐，谩骂，赌博
         print(response)
         if response:
-            return response
+            row['label'] = "response"
+            return row
+            # return
         else:
-            return "其他"
+            row['label'] = "其他"
+            return row
     except Exception as e:
         print(e)
-        return "其他"
+        row['label'] = "其他"
+        return row
 
 
 word_list = pd.read_table('暂未分类.txt', sep='\t', header=None, names=['word'])
 
 
-word_list['label'] = word_list['word'].progress_apply(get_sensitive_label)
+# word_list['label'] = word_list['word'].progress_apply(get_sensitive_label)
+#
+# word_list.to_csv('result.csv',index=None)
+# def increase_income_by_percent(row, percent_increase=10):
+#     """
+#     函数用于增加收入百分比。
+#     """
+#     row['Income'] = row['Income'] * (1 + percent_increase / 100)
+#     return row
 
-word_list.to_csv('result.csv',index=None)
+
+# 输出文件名
+output_file = 'result.csv'
+
+# 检查文件是否存在，不存在则先写入表头
+if not pd.read_csv(output_file, nrows=0).empty:
+    word_list.iloc[0:0].to_csv(output_file, index=False)  # 写入空的DataFrame以创建文件并包含表头
+
+# 遍历DataFrame，处理每一行并即时保存
+for index, row in tqdm(word_list.iterrows(), total=len(word_list), desc="Processing rows"):
+    processed_row = get_sensitive_label(row)
+    processed_df = pd.DataFrame(processed_row).transpose()  # 转置以便保存单行
+    processed_df.to_csv(output_file, mode='a', header=False, index=False)  # 追加到文件，不写入表头
+
+print("处理并保存完成。")
