@@ -85,10 +85,10 @@ word_list = pd.read_table('暂未分类.txt', sep='\t', header=None, names=['wor
 
 # 输出文件名
 output_file = 'result.csv'
-
-# 检查文件是否存在，不存在则先写入表头
-if not pd.read_csv(output_file, nrows=0).empty:
-    word_list.iloc[0:0].to_csv(output_file, index=False)  # 写入空的DataFrame以创建文件并包含表头
+#
+# # 检查文件是否存在，不存在则先写入表头
+# if not pd.read_csv(output_file, nrows=0).empty:
+#     word_list.iloc[0:0].to_csv(output_file, index=False)  # 写入空的DataFrame以创建文件并包含表头
 
 # 遍历DataFrame，处理每一行并即时保存
 for index, row in tqdm(word_list.iterrows(), total=len(word_list), desc="Processing rows"):
