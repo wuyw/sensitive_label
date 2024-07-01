@@ -57,7 +57,7 @@ def get_sensitive_label(row):
         # 色情，政治，暴恐，谩骂，赌博
         print(response)
         if response:
-            row['label'] = "response"
+            row['label'] = response
             return row
             # return
         else:
